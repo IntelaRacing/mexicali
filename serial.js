@@ -1,6 +1,6 @@
 const SerialPort = require('serialport');
 const Readline = SerialPort.parsers.Readline;
-const SERIAL = process.env.SERIAL
+const SERIAL = process.env.SERIAL || '/dev/tty.usbserial-A603YF28';
 const BAUD = process.env.BAUD || 9600
 
 // TODO get serial and baud from CLI
