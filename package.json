@@ -1,0 +1,15 @@
+{
+  "name": "intelaracing-mexicali",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andrew Hoang <ahoang18@bu.edu> (https://fynchbio.bu.edu)",
+  "dependencies": {
+    "serialport": "^6.0.5",
+    "ws": "^4.0.0"
+  }
+}
