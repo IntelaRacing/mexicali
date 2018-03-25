@@ -3,6 +3,7 @@ import * as Debug from "debug";
 import * as path from "path";
 import * as ws from "ws";
 
+import { DB } from "./database";
 import { IMexicaliSerialOptions, MexicaliSerial } from "./serial";
 const debug = Debug("index");
 
@@ -34,7 +35,7 @@ export class Mexicali {
     this.serial = new MexicaliSerial({ serial: options.serial, baudRate: options.baudRate });
 
     // TODO replace setInterval
-    this.wss.on("connection", (socket) => {
+    this.wss.on("connection", (socket): void => {
       const id = setInterval(() => {
         socket.send(JSON.stringify(heartbeat), (err) => {
           if (err) {
@@ -50,7 +51,7 @@ export class Mexicali {
         clearInterval(id);
       });
 
-      socket.on("error", (err: ISocketError) => {
+      socket.on("error", (err: ISocketError): void => {
         debug(err);
         if (err.code !== "ECONNRESET") {
             throw err;
@@ -59,7 +60,7 @@ export class Mexicali {
     });
 
     // Sample data message: -a+75.20#
-    this.serial.parser.on("data", (data: string) => {
+    this.serial.parser.on("data", (data: string): void => {
       // TODO validate data here
       debug(data);
 
@@ -82,6 +83,7 @@ export class Mexicali {
         return;
       }
 
+      // TODO replace ts with moment
       const value = data.substring(3, data.length - 2);
       const ts = new Date();
       const hours = ts.getHours();
@@ -99,7 +101,7 @@ export class Mexicali {
     });
   }
 
-  public broadcast(data: string) {
+  public broadcast(data: string): void {
     this.wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(data);
