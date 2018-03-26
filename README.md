@@ -11,3 +11,10 @@ Install:
 ```
 yarn install
 ```
+
+### TODO
+-   Add dbcreate/destroy scripts
+-   Add DB schema
+-   Add DB insert
+-   Add REST API for sensor config
+-   Add tests

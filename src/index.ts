@@ -1,8 +1,10 @@
 import * as assert from "assert";
 import * as Debug from "debug";
+import * as moment from "moment";
 import * as path from "path";
 import * as ws from "ws";
 
+import { Reading, SensorConfig } from "./database";
 import { IMexicaliSerialOptions, MexicaliSerial } from "./serial";
 const debug = Debug("index");
 
@@ -19,7 +21,7 @@ const heartbeat = {
 };
 
 const SENSORS_AVAILABLE = {
-  a: "engine-temperature",
+  a: "engine_temperature",
   b: "latitude",
   c: "longitude",
   d: "speed",
@@ -30,11 +32,12 @@ export class Mexicali {
   private serial: MexicaliSerial;
 
   constructor(options: IMexicaliOptions) {
+    debug("Initiating Mexicali Websocket Server");
     this.wss = new ws.Server({ port: options.port});
     this.serial = new MexicaliSerial({ serial: options.serial, baudRate: options.baudRate });
 
     // TODO replace setInterval
-    this.wss.on("connection", (socket) => {
+    this.wss.on("connection", (socket): void => {
       const id = setInterval(() => {
         socket.send(JSON.stringify(heartbeat), (err) => {
           if (err) {
@@ -50,7 +53,7 @@ export class Mexicali {
         clearInterval(id);
       });
 
-      socket.on("error", (err: ISocketError) => {
+      socket.on("error", (err: ISocketError): void => {
         debug(err);
         if (err.code !== "ECONNRESET") {
             throw err;
@@ -59,7 +62,7 @@ export class Mexicali {
     });
 
     // Sample data message: -a+75.20#
-    this.serial.parser.on("data", (data: string) => {
+    this.serial.parser.on("data", (data: string): void => {
       // TODO validate data here
       debug(data);
 
@@ -82,8 +85,9 @@ export class Mexicali {
         return;
       }
 
+      // TODO replace ts with moment
       const value = data.substring(3, data.length - 2);
-      const ts = new Date();
+      const ts =  moment().toDate();
       const hours = ts.getHours();
       const minutes = ts.getMinutes();
       const seconds = ts.getSeconds();
@@ -95,11 +99,21 @@ export class Mexicali {
       };
 
       debug(reading);
+      // Save reading to database
+      Reading.create({
+        created_at: ts,
+        sensor_id: SensorConfig[SENSORS_AVAILABLE[sensorCode]].id,
+        value,
+       }).then((entry) => {
+        debug(`Wrote sensor: ${SensorConfig[SENSORS_AVAILABLE[sensorCode]].name}, value: ${value}`);
+      });
+
+      // Send reading over websocket
       this.broadcast(JSON.stringify(reading));
     });
   }
 
-  public broadcast(data: string) {
+  public broadcast(data: string): void {
     this.wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(data);
@@ -109,4 +123,3 @@ export class Mexicali {
 }
 
 // Websocket server with heartbeats
-// TODO change port via command line

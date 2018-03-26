@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node dist/bin/mexicali.js",
     "build": "yarn lint && tsc",
+    "clean": "rm -rf dist/",
     "lint": "tslint -c tslint.json --fix 'src/**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,10 +14,14 @@
   "dependencies": {
     "@types/commander": "^2.12.2",
     "@types/debug": "^0.0.30",
+    "@types/moment": "^2.13.0",
+    "@types/sequelize": "^4.27.12",
     "@types/serialport": "^6.0.1",
+    "@types/sqlite3": "^3.1.1",
     "@types/ws": "^4.0.1",
     "commander": "^2.15.1",
     "debug": "^3.1.0",
+    "moment": "^2.21.0",
     "sequelize": "^4.37.4",
     "serialport": "^6.0.5",
     "sqlite3": "^4.0.0",
