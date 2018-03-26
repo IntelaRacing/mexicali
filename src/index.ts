@@ -121,5 +121,3 @@ export class Mexicali {
     });
   }
 }
-
-// Websocket server with heartbeats
