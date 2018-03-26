@@ -2,7 +2,7 @@
 
 /* tslint:disable:no-console */
 import * as program from "commander";
-import { Reading, Sensor } from "../database";
+import { Reading, Sensor, SensorConfig } from "../database";
 import { IMexicaliOptions, Mexicali } from "../index";
 
 program
@@ -19,13 +19,23 @@ if (!program.serial) {
 }
 
 if (program.databaseInit) {
-  const Sensors = [ "Engine Temperature", "Latitude", "Longitude", "Speed" ];
-
   Sensor.sync({ force: true })
     .then(() => {
       console.log("Building sensor table in DB");
-      return Promise.all(Sensors.map((sensor) => {
-        Sensor.create({ name: sensor });
+
+      // TODO fixme
+      const sensorArr: any[] = [];
+
+      Object.keys(SensorConfig).forEach((key) => {
+        sensorArr.push({
+          hash: key,
+          id: SensorConfig[key].id,
+          name: SensorConfig[key].name,
+        });
+      });
+
+      return Promise.all(sensorArr.map((sensor) => {
+        Sensor.create({ hash: sensor.hash, id: sensor.id, name: sensor.name });
       }));
     })
     .then(() => {

@@ -1,7 +1,7 @@
 import * as Debug from "debug";
 import * as Sequelize from "sequelize";
 
-const debug = Debug("Sequelize");
+const debug = Debug("sequelize");
 
 // https://michalzalecki.com/using-sequelize-with-typescript/
 
@@ -56,6 +56,10 @@ export const DB = new MexicaliDB({
 
 // Models below
 export const Reading = DB.sequelize().define("Reading", {
+  created_at: {
+    allowNull: false,
+    type: Sequelize.DATE,
+  },
   id: {
     defaultValue: Sequelize.UUIDV4,
     primaryKey: true,
@@ -69,11 +73,23 @@ export const Reading = DB.sequelize().define("Reading", {
     allowNull: false,
     type: Sequelize.DECIMAL(10, 2),
   },
+}, {
+  timestamps: true,
+  updatedAt: false,
 });
 
 export const Sensor = DB.sequelize().define("Sensor", {
+  created_at: {
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
+    type: Sequelize.DATE,
+  },
+  hash: {
+    allowNull: false,
+    type: Sequelize.STRING,
+  },
   id: {
-    defaultValue: Sequelize.UUIDV4,
+    allowNull: false,
     primaryKey: true,
     type: Sequelize.UUID,
   },
@@ -81,7 +97,29 @@ export const Sensor = DB.sequelize().define("Sensor", {
     allowNull: false,
     type: Sequelize.STRING,
   },
+}, {
+  timestamps: true,
+  updatedAt: false,
 });
 
 Sensor.hasMany(Reading, { foreignKey: "sensor_id", sourceKey: "id" });
 Reading.belongsTo(Sensor, { foreignKey: "sensor_id", targetKey: "id" });
+
+export const SensorConfig = {
+  engine_temperature: {
+    id: "fac28420-be3b-4554-ad34-df6264f1d8ff",
+    name: "Engine Temperature",
+  },
+  latitude: {
+    id: "dd9a1793-b889-49c5-b57c-d313e254ce5f",
+    name: "Latitude",
+  },
+  longitude: {
+    id: "9268b6f5-4a33-4a72-86c7-36289c8e2a7e",
+    name: "Longitude",
+  },
+  speed: {
+    id: "58db4fca-717f-4ba1-b57c-1197938a9c66",
+    name: "Speed",
+  },
+};
