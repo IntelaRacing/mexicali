@@ -106,9 +106,17 @@ Sensor.hasMany(Reading, { foreignKey: "sensor_id", sourceKey: "id" });
 Reading.belongsTo(Sensor, { foreignKey: "sensor_id", targetKey: "id" });
 
 export const SensorConfig = {
+  brake_pedal: {
+    id: "47778a5d-3ad8-40ab-b8ed-5fafed404eda",
+    name: "Speed",
+  },
   engine_temperature: {
     id: "fac28420-be3b-4554-ad34-df6264f1d8ff",
     name: "Engine Temperature",
+  },
+  gas_pedal: {
+    id: "513d2e95-0e20-4a71-9cc3-4e0f4cb4769c",
+    name: "Gas Pedal",
   },
   latitude: {
     id: "dd9a1793-b889-49c5-b57c-d313e254ce5f",
@@ -118,8 +126,24 @@ export const SensorConfig = {
     id: "9268b6f5-4a33-4a72-86c7-36289c8e2a7e",
     name: "Longitude",
   },
+  rpm: {
+    id: "426225af-b4d6-4963-9ef2-b6caa738b4ab",
+    name: "RPM",
+  },
+  sos: {
+    id: "23162fc2-33f8-450b-9eb9-06829e60b78a",
+    name: "SOS",
+  },
   speed: {
     id: "58db4fca-717f-4ba1-b57c-1197938a9c66",
     name: "Speed",
+  },
+  suspension: {
+    id: "c1fe1a1c-d637-42c5-b352-511a32ea7b59",
+    name: "Suspension Travel",
+  },
+  transmission_temperature: {
+    id: "1e26c1d6-e951-403c-909c-70fad0d0f476",
+    name: "Transmission Temperature",
   },
 };
