@@ -25,6 +25,151 @@ const SENSORS_AVAILABLE = {
   b: "latitude",
   c: "longitude",
   d: "speed",
+  e: "suspension",
+  f: "gas_pedal",
+  g: "brake_pedal",
+  h: "sos",
+  i: "rpm",
+  q: "transmission_temperature",
+};
+
+const state = {
+  brake_pedal: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  engine_temperature: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  gas_pedal: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  latitude: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  longitude: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  rpm: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  sos: {
+    triggers: [{
+      name: "danger",
+      value: 1,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  speed: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  suspension: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
+  transmission_temperature: {
+    triggers: [{
+      name: "danger",
+      value: 0,
+      },
+      {
+        name: "warning",
+        value: 10,
+      },
+    ],
+    ts: "N/A",
+    type: "inactive",
+    value: "N/A",
+  },
 };
 
 export class Mexicali {
@@ -55,9 +200,6 @@ export class Mexicali {
 
       socket.on("error", (err: ISocketError): void => {
         debug(err);
-        if (err.code !== "ECONNRESET") {
-            throw err;
-        }
       });
     });
 
@@ -68,7 +210,7 @@ export class Mexicali {
 
       try {
         assert(data);
-        assert(data.length >= 9);
+        assert(data.length > 5);
         assert(data[0] === "-");
         assert(data[2] === "+");
         assert(data[data.length - 2] === "#");
@@ -93,12 +235,16 @@ export class Mexicali {
       const seconds = ts.getSeconds();
 
       const reading = {
-        sensor,
+        triggers: state[SENSORS_AVAILABLE[sensorCode]].triggers,
         ts: hours + " : " + minutes + " : " + seconds,
+        type: "active",
         value,
       };
 
-      debug(reading);
+      delete state[SENSORS_AVAILABLE[sensorCode]];
+      state[SENSORS_AVAILABLE[sensorCode]] = reading;
+
+      debug(state);
       // Save reading to database
       Reading.create({
         created_at: ts,
@@ -108,14 +254,14 @@ export class Mexicali {
         debug(`Wrote sensor: ${SensorConfig[SENSORS_AVAILABLE[sensorCode]].name}, value: ${value}`);
       });
 
-      // Send reading over websocket
-      this.broadcast(JSON.stringify(reading));
+      // Send state over websocket
+      this.broadcast(JSON.stringify(state));
     });
   }
 
   public broadcast(data: string): void {
     this.wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
+      if (client.readyState === ws.OPEN) {
         client.send(data);
       }
     });
